@@ -1,13 +1,8 @@
 <samp>
 
-# azampay
+# [azampay](https://developerdocs.azampay.co.tz/redoc)
 
 Python Wrapper to Azampay Payment Gateway
-
-## Base Urls
-
-Authenticator Sandbox Base Url: <https://authenticator-sandbox.azampay.co.>.
-Azampay Sandbox Checkout Base Url: <https://sandbox.azampay.co.tz>.
 
 ## Azampay API Flow
 
