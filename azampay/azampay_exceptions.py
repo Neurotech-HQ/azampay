@@ -34,8 +34,26 @@ class BadRequest(Exception):
     Please read the docs and fix the body and then try again later.    
     """
 
-    def __init__(self, error_message) -> None:
-        super().__init__(error_message)
+    def __init__(self, error_message=error_message, **args) -> None:
+        super().__init__(error_message, *args)
+
+
+class InvalidURL(Exception):
+    """InvalidURL
+
+    This exception will be thrown when either base URL or secondary endpoint is invalid
+
+    Please check the URL and try again
+    """
+
+    error_message: str = """
+    Ooops, Your URL is invalid
+    
+    Please check the URL and try again
+    """
+
+    def __init__(self, error_message=error_message, **args) -> None:
+        super().__init__(error_message, **args)
 
 
 class InternalServerError(Exception):
@@ -47,11 +65,11 @@ class InternalServerError(Exception):
     """
 
     error_message: str = """
-    Oops, Sorry, We are experiencing an issue on the side
+    Oops, Sorry, We are experiencing issues on our side
     
-    We are apologize for any inconvinience we have caused you
+    We are apologize for any inconvinience we might have caused you
     
-    Please come back a bilt later while we work had to fix this
+    Please come back a bit later while we work hard to fix this
     """
 
     def __init__(self, error_message=error_message) -> None:

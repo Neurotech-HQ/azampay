@@ -7,17 +7,21 @@ import sys
 import json
 import requests
 import logging
-from typing import Union, List, Dict, Optional, Any
+from json.decoder import JSONDecodeError
+from typing import List, Dict, Optional, Any
 from azampay.azampay_exceptions import (
     InvalidCredentials,
     BadRequest,
+    InvalidURL,
     InternalServerError,
 )
 
 # Setup Logging
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-logger.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
 
 
 class Azampay(object):
@@ -25,12 +29,12 @@ class Azampay(object):
     AzamPay payment gateway Client SDK
     """
 
-    SANDBOX_AUTH_BASE_URL: str = "https://authenticator-sandbox.azampay.co.tz/"
-    SANDBOX_BASE_URL: str = "https://sandbox.azampay.co.tz/"
+    SANDBOX_AUTH_BASE_URL: str = "https://authenticator-sandbox.azampay.co.tz"
+    SANDBOX_BASE_URL: str = "https://sandbox.azampay.co.tz"
     AUTH_BASE_URL: Optional[str] = None
     BASE_URL: Optional[str] = None
 
-    SUPPORTED_MNOS: List[str] = ["Airtel" "Tigo" "Halopesa" "Azampesa"]
+    SUPPORTED_MNOS: List[str] = ["Airtel", "Tigo", "Halopesa", "Azampesa"]
     SUPPORTED_BANKS: List[str] = ["CRDB", "NMB"]
 
     SUPPORTED_CURRENCIES: List[str] = ["TZS"]
@@ -85,7 +89,7 @@ class Azampay(object):
         self.__x_api_key = x_api_key
 
     def _token(self):
-        token_url: str = f"{self.BASE_URL}/AppRegistration/GenerateToken"
+        token_url: str = f"{self.AUTH_BASE_URL}/AppRegistration/GenerateToken"
         response: Dict[str, Any] = self.post(
             url=token_url,
             body={
@@ -96,8 +100,8 @@ class Azampay(object):
             _headers=False,
         )
         token = response["data"]["accessToken"]
-        message = response["message"]
-        logger.info(message)
+        message = response.get("message")
+        logging.info(message)
         return token
 
     @property
@@ -109,8 +113,8 @@ class Azampay(object):
         """
         return {
             "Authorization": f"Bearer {self.__token}",
-            "Content-Type": "Application/json",
-            "X-API-KEY": self.__x_api_key,
+            "Content-Type": "application/json",
+            "X-API-Key": self.__x_api_key,
         }
 
     def post(
@@ -131,22 +135,30 @@ class Azampay(object):
         if not _headers:
             response = requests.post(
                 url=url,
-                json=json.dumps(body),
-                headers={"Content-Type": "Application/json"},
+                json=body,
+                headers={"Content-Type": "application/json"},
             )
         else:
-            response = requests.post(
-                url=url, json=json.dumps(body), headers=self.headers
-            )
+            response = requests.post(url=url, json=body, headers=self.headers)
 
         if response.status_code == 423:
             raise InvalidCredentials
         elif response.status_code == 400:
-            raise BadRequest
+            raise BadRequest(f"Bad Request: {response.text}")
+        elif response.status_code == 404:
+            raise InvalidURL("{} is not a valid url".format(url))
         elif response.status_code == 500:
             raise InternalServerError
         else:
-            return response.json()
+            try:
+                return response.json()
+            except ValueError as e:
+                logging.error(e)
+                return {
+                    "message": "Something went wrong with decoding the response",
+                    "status": response.status_code,
+                    "data": response.text,
+                }
 
     @staticmethod
     def clean_mobile_number(mobile_number: str) -> str:
@@ -174,6 +186,7 @@ class Azampay(object):
     @staticmethod
     def clean_amount(amount: str):
         # remove spaces and commas
+        amount = str(amount)
         amount = amount.replace(" ", "").replace(",", "")
         return amount
 
@@ -210,7 +223,7 @@ class Azampay(object):
         """
 
         # validate the provider
-        mno_provider = provider.capitalize()
+        mno_provider = provider.strip().capitalize()
         if mno_provider not in self.SUPPORTED_MNOS:
             raise ValueError(f"{mno_provider} is not a supported mno")
 
@@ -224,8 +237,7 @@ class Azampay(object):
         # Clean the amount
         amount = self.clean_amount(amount)
 
-        # Make the request
-        logger.info(f"Making request to {self.BASE_URL}/azampay/mno/checkout")
+        # Make info(f"Making request to {self.BASE_URL}/azampay/mno/checkout")
         response: Dict[str, Any] = self.post(
             url=f"{self.BASE_URL}/azampay/mno/checkout",
             body={
@@ -237,20 +249,9 @@ class Azampay(object):
                 "additionalProperties": additional_properties,
             },
         )
-        message = response["message"]
-        logger.info(message)
+        message = response.get("message")
+        logging.info(message)
         return response
-
-    #     const fetch = require('node-fetch');
-    # const data = { 'amount':'2000', 'currencyCode':'TZS', 'merchantAccountNumber': '1292-123', 'merchantMobileNumber':'255123123123', 'merchantName':null, otp:'1234', 'provider':'NMB','referenceId':'123321'};
-    # const  headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN, 'X-API-Key': 'API-KEY'};
-    # fetch(`{BaseUrl}/azampay/bank/checkout`, {
-    #  method: 'POST',
-    #  headers,
-    #  body: data,
-    # })
-    # .then(res => { /* response */})
-    # .catch(err => {/* error */});
 
     def bank_checkout(
         self,
@@ -291,7 +292,7 @@ class Azampay(object):
         """
 
         ## validate the provider
-        provider = provider.upper()
+        provider = provider.strip().upper()
         if provider not in self.SUPPORTED_BANKS:
             raise ValueError(f"{provider} is not a supported bank")
 
@@ -305,8 +306,7 @@ class Azampay(object):
         # Clean the amount
         amount = self.clean_amount(amount)
 
-        ## Make the request
-        logger.info(f"Making request to {self.BASE_URL}/azampay/bank/checkout")
+        ## Makeinfo(f"Making request to {self.BASE_URL}/azampay/bank/checkout")
         response: Dict[str, Any] = self.post(
             f"{self.BASE_URL}/azampay/bank/checkout",
             body={
@@ -322,9 +322,10 @@ class Azampay(object):
             },
         )
 
-        message = response["message"]
-        logger.info(message)
+        logging.info(response)
+        message = response.get("message")
+        logging.info(message)
         return response
 
 
-sys.modules[__name__] = Azampay
+# sys.modules[__name__] = Azampay

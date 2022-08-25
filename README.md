@@ -42,7 +42,7 @@ Azampay offers two forms of authentication:
 Bearer Auth - an open protocol to allow secure authorization in a simple and standard method from web, mobile and desktop applications.
 API-Key is the key that is provided in the http request header. Key Name is X-API-KEY.
 
-```Bearer Token``` is the JWT token that you get against your application Name, Client Id and Client Secret. For Sanbox Environment, You can get these application credentials from Sandbox portal. For production environment, you will be provided these keys after you submit your business KYC to Azampay from Sandbox portal.
+```Bearer Token``` is the JWT token that you get against your application Name, Client Id and Client Secret. For Sanbox Environment, You can get these application credentials from [Sandbox portal](https://developers.azampay.co.tz/). For production environment, you will be provided these keys after you submit your business KYC to Azampay from Sandbox portal.
 
 **Azampay** Package handles the authentication for you. You just need to provide it with its credentials and it will do the rest. Here is the example of how to use it.
 
@@ -83,7 +83,7 @@ Here is the example of how to use the bank checkout.
 ```python
 >>> from azampay import Azampay
 >>> azampay = Azampay(app_name='<app_name>', client_id='<client_id>', client_secret='<client_secret>', x_api_key='<x_api_key>', sandbox=True)
->>> checkout_response = azampay.bank_checkout(amount=100, merchant_account_number='<merchant_account_number>', merchant_mobile_number='<merchant_mobile_number>', external_id='<external_id>', provider='<provider>')
+>>> checkout_response = azampay.bank_checkout(amount=100, merchant_account_number='<merchant_account_number>', merchant_mobile_number='<merchant_mobile_number>', reference_id='<external_id>', provider='<provider>')
 ```
 
 ### Callback
