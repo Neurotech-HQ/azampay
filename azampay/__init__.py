@@ -20,7 +20,7 @@ logger.setLevel(logging.INFO)
 logger.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
 
-class AzamPay(object):
+class Azampay(object):
     """
     AzamPay payment gateway Client SDK
     """
@@ -43,7 +43,7 @@ class AzamPay(object):
         client_secret: str,
         x_api_key: str,
         base_url: Optional[str] = None,
-        auth_base_url: Optional[str] = None,
+        auth_url: Optional[str] = None,
         sandbox: Optional[bool] = True,
     ):
         """__init__ method
@@ -55,7 +55,7 @@ class AzamPay(object):
             client_id (str): The client id
             client_secret (str): The client secret
             base_url (str, optional): Production base_url. Defaults to None.
-            auth_base_url (str, optional): Production auth_base_url. Defaults to None.
+            auth_url (str, optional): Production auth_base_url. Defaults to None.
             sandbox (bool, optional): determines whether you're running on sandbox or production url. Defaults to True.
 
         Raises:
@@ -70,12 +70,12 @@ class AzamPay(object):
             self.AUTH_BASE_URL = self.SANDBOX_AUTH_BASE_URL
             self.BASE_URL = self.SANDBOX_BASE_URL
         else:
-            if not (auth_base_url and base_url):
+            if not (auth_url and base_url):
                 raise ValueError(
                     "production auth_base_url and base_url are required in production mode"
                 )
 
-            self.AUTH_BASE_URL = auth_base_url
+            self.AUTH_BASE_URL = auth_url
             self.BASE_URL = base_url
 
         self.app_name: str = app_name
@@ -327,4 +327,4 @@ class AzamPay(object):
         return response
 
 
-sys.modules[__name__] = AzamPay
+sys.modules[__name__] = Azampay
