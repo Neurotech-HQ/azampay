@@ -4,6 +4,10 @@
 
 Python Wrapper to Azampay Payment Gateway
 
+[![Downloads](https://pepy.tech/badge/azampay)](https://pepy.tech/project/azampay)
+[![Downloads](https://pepy.tech/badge/azampay/month)](https://pepy.tech/project/azampay)
+[![Downloads](https://pepy.tech/badge/azampay/week)](https://pepy.tech/project/azampay)
+
 ## Azampay API Flow
 
 All Azampay APIs follow two step process:
