@@ -14,7 +14,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Neurotech-HQ/azampay",
-    download_url="https://github.com/Neurotech-HQ/azampay/archive/refs/tags/alphav0.1.tar.gz",
+    download_url="https://github.com/Neurotech-HQ/azampay/archive/refs/tags/v0.1.tar.gz",
     author="Jordan Kalebu",
     author_email="isaackeinstein@gmail.com",
     license="MIT",

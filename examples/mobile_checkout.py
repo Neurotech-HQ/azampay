@@ -15,7 +15,7 @@ gateway = Azampay(
 
 
 response = gateway.mobile_checkout(
-    mobile="06xxxxxxxx", amount=1000, provider="tigo", external_id="123456789"
+    mobile="0667863412", amount=1000, provider="tigo", external_id="123456789"
 )
 
 print(response)

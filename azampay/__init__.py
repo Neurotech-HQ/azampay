@@ -261,7 +261,7 @@ class Azampay(object):
         amount: str,
         otp: str,
         provider: str,
-        reference_id: Optional[str] = None,
+        reference_id: str,
         currency: Optional[str] = "TZS",
         merchant_name: Optional[str] = None,
         additional_properties: Optional[Dict[str, Any]] = None,
@@ -317,7 +317,7 @@ class Azampay(object):
                 "merchantName": merchant_name,
                 "otp": otp,
                 "provider": provider,
-                "referenceId": reference_id,
+                "referenceId": str(reference_id),
                 "additionalProperties": additional_properties,
             },
         )

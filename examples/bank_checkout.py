@@ -21,8 +21,8 @@ checkout_response = gateway.bank_checkout(
     amount=100,
     merchant_account_number="123456789",
     merchant_mobile_number="0657649154",
-    reference_id="123456789",
     otp="123456",
     provider="NMB",
+    reference_id="123456",
 )
 print(checkout_response)
