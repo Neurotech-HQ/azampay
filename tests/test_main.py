@@ -37,7 +37,7 @@ def test_bank_checkout(gateway):
 def test_mobile_checkout(gateway):
     reference_id = str(uuid.uuid4())
     checkout_response = gateway.mobile_checkout(
-        mobile="0667863412", amount=1000, provider="tigo", external_id=reference_id
+        mobile="0667863412", amount=1000, external_id=reference_id
     )
 
     print(checkout_response)

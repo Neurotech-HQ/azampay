@@ -7,6 +7,8 @@ import sys
 import json
 import requests
 import logging
+import phonenumbers
+from phonenumbers import carrier
 from json.decoder import JSONDecodeError
 from typing import List, Dict, Optional, Any
 from azampay.azampay_exceptions import (
@@ -104,6 +106,20 @@ class Azampay(object):
         logging.info(message)
         return token
 
+    def _get_carrier(self, mobile: str) -> str:
+        """_get_carrier
+
+        Returns the carrier of the mobile number
+
+        Args:
+            mobile (str): The mobile number
+
+        Returns:
+            str: The carrier of the mobile number
+        """
+        mobile = phonenumbers.parse(mobile, "TZ")
+        return phonenumbers.carrier.name_for_number(mobile, "en")
+
     @property
     def headers(self) -> Dict[str, str]:
         """headers
@@ -196,7 +212,7 @@ class Azampay(object):
         mobile: str,
         amount: str,
         external_id: str,
-        provider: str,
+        provider: str = None,
         currency: Optional[str] = "TZS",
         additional_properties: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
@@ -221,6 +237,10 @@ class Azampay(object):
         Example:
             add example here
         """
+
+        # Check if user specified provider
+        if not provider:
+            provider = self._get_carrier(mobile)
 
         # validate the provider
         mno_provider = provider.strip().capitalize()
@@ -299,6 +319,8 @@ class Azampay(object):
         # validate the currency
         if currency not in self.SUPPORTED_CURRENCIES:
             raise ValueError(f"{currency} is not a supported currency")
+
+        logging.info(f"provider: {provider}")
 
         # clean the mobile number
         mobile = self.clean_mobile_number(merchant_mobile_number)

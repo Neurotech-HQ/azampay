@@ -9,7 +9,7 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="azampay",
-    version="0.1",
+    version="0.2",
     description="Opensource python wrapper for Azampay API",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -19,7 +19,7 @@ setup(
     author_email="isaackeinstein@gmail.com",
     license="MIT",
     packages=["azampay"],
-    install_requires=["requests"],
+    install_requires=["requests", "phonenumbers"],
     keywords=[
         "azampay",
         "azampay SDK",
