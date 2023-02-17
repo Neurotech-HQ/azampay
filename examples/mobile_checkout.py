@@ -11,8 +11,6 @@ gateway = Azampay(
     client_id=os.getenv("CLIENT_ID"),
     client_secret=os.getenv("CLIENT_SECRET"),
     x_api_key=os.getenv("X_API_KEY"),
-    base_url="https://checkout.azampay.co.tz",
-    auth_url="https://authenticator.azampay.co.tz",
     sandbox=False,
 )
 

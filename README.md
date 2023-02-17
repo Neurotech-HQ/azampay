@@ -55,12 +55,11 @@ API-Key is the key that is provided in the http request header. Key Name is X-AP
 >>> azampay = Azampay(app_name='<app_name'>, client_id='<client_id>', client_secret='<client_secret>', x_api_key='<x_api_key>', sandbox=True)
 ```
 
-**Note**: When you want to use the package in production environment, you will need to provide the production credentials provided by Azampay plus the  production base and authentication endpoints. Here is the example of how to use it.
+**Note**: When you want to use the package in production environment, No need to specify the X-API-Key. 
 
 ```python
-
 >>> from azampay import Azampay
->>> azampay = Azampay(app_name='<app_name>', client_id='<client_id>', client_secret='<client_secret>', x_api_key='<x_api_key>', sandbox=False, base_url='<base_url>', auth_url='<auth_url>')
+>>> azampay = Azampay(app_name='<app_name>', client_id='<client_id>', client_secret='<client_secret>', sandbox=False)
 ```
 
 ## Checkout

@@ -33,8 +33,8 @@ class Azampay(object):
 
     SANDBOX_AUTH_BASE_URL: str = "https://authenticator-sandbox.azampay.co.tz"
     SANDBOX_BASE_URL: str = "https://sandbox.azampay.co.tz"
-    AUTH_BASE_URL: Optional[str] = None
-    BASE_URL: Optional[str] = None
+    AUTH_BASE_URL: Optional[str] = "https://authenticator.azampay.co.tz"
+    BASE_URL: Optional[str] = "https://checkout.azampay.co.tz"
 
     SUPPORTED_MNOS: List[str] = ["Airtel", "Tigo", "Halopesa", "Azampesa"]
     SUPPORTED_BANKS: List[str] = ["CRDB", "NMB"]
@@ -47,9 +47,7 @@ class Azampay(object):
         app_name: str,
         client_id: str,
         client_secret: str,
-        x_api_key: str,
-        base_url: Optional[str] = None,
-        auth_url: Optional[str] = None,
+        x_api_key: str = None,
         sandbox: Optional[bool] = True,
     ):
         """__init__ method
@@ -75,14 +73,6 @@ class Azampay(object):
         if sandbox:
             self.AUTH_BASE_URL = self.SANDBOX_AUTH_BASE_URL
             self.BASE_URL = self.SANDBOX_BASE_URL
-        else:
-            if not (auth_url and base_url):
-                raise ValueError(
-                    "production auth_base_url and base_url are required in production mode"
-                )
-
-            self.AUTH_BASE_URL = auth_url
-            self.BASE_URL = base_url
 
         self.app_name: str = app_name
         self.client_id: str = client_id
