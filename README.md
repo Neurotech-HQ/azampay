@@ -89,6 +89,27 @@ Here is the example of how to use the bank checkout.
 >>> checkout_response = azampay.bank_checkout(amount=100, merchant_account_number='<merchant_account_number>', merchant_mobile_number='<merchant_mobile_number>', reference_id='<external_id>', provider='<provider>')
 ```
 
+### Generate Payment Link
+
+Here is the example of how to use the generate payment link.
+
+```python
+>>> from azampay import Azampay
+>>> azampay = Azampay(
+...     app_name='<app_name>',
+...     client_id='<client_id>',
+...     client_secret='<client_secret>',
+...     x_api_key='<x_api_key>',
+...     sandbox=True
+)
+>>> payment_link = azampay.generate_payment_link(
+    amount='<amount>', external_id='<external_id>', provider='<provider>'
+)
+>>> payment_link = azampay.generate_payment_link(
+    amount='5000', external_id='12345343', provider='Airtel'
+)['data']
+```
+
 ### Callback
 
 Now that you already know to initiate payments with Azampay package, Let's get started with the callback.

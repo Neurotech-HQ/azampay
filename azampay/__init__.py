@@ -10,7 +10,7 @@ import logging
 import phonenumbers
 from phonenumbers import carrier
 from json.decoder import JSONDecodeError
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any, Tuple
 from azampay.azampay_exceptions import (
     InvalidCredentials,
     BadRequest,
@@ -36,7 +36,14 @@ class Azampay(object):
     AUTH_BASE_URL: Optional[str] = "https://authenticator.azampay.co.tz"
     BASE_URL: Optional[str] = "https://checkout.azampay.co.tz"
 
-    SUPPORTED_MNOS: List[str] = ["Airtel", "Tigo", "Halopesa", "Azampesa"]
+    MNOS_MAP: Dict[str, str] = {
+        "Tigopesa": "Tigo",
+        "Airtel": "Airtel",
+        "Halopesa": "Halopesa",
+        "Azampesa": "Azampesa",
+        "Vodacom": "Vodacom",
+    }
+
     SUPPORTED_BANKS: List[str] = ["CRDB", "NMB"]
 
     SUPPORTED_CURRENCIES: List[str] = ["TZS"]
@@ -196,6 +203,52 @@ class Azampay(object):
         amount = amount.replace(" ", "").replace(",", "")
         return amount
 
+    def supported_mnos_data(self) -> List[str]:
+        """supported_mnos
+
+        Fetches a list of supported mobile network operators
+        From the API (POST: /api/v1/Partner/GetPaymentPartners)
+
+        Returns:
+            List[str]: List of supported mobile network operators
+        """
+
+        response = requests.get(
+            f"{self.BASE_URL}/api/v1/Partner/GetPaymentPartners",
+            headers=self.headers,
+        )
+        if response.status_code == 200:
+            return response.json()
+        else:
+            logging.error(response.text)
+            return {}
+
+    @property
+    def supported_mnos(self):
+        return [self.MNOS_MAP.get(mno, mno) for mno in self._unmapped_supported_mnos]
+
+    @property
+    def _unmapped_supported_mnos(self):
+        response = self.supported_mnos_data()
+        return [patrner["partnerName"].capitalize() for patrner in response]
+
+    def _get_vendor_id_and_name(self, provider: str) -> Tuple[str, str]:
+        """_get_vendor_id_and_name
+
+        Returns the vendor id and name of the given provider
+
+        Args:
+            provider (str): The provider
+
+        Returns:
+            Tuple[str, str]: The vendor id and name of the given provider
+        """
+        response = self.supported_mnos_data()
+        for patrner in response:
+            if patrner["partnerName"].capitalize() == provider:
+                return patrner["paymentVendorId"], patrner["partnerName"]
+        raise ValueError(f"{provider} is not a supported provider")
+
     def mobile_checkout(
         self,
         *,
@@ -234,7 +287,7 @@ class Azampay(object):
 
         # validate the provider
         mno_provider = provider.strip().capitalize()
-        if mno_provider not in self.SUPPORTED_MNOS:
+        if mno_provider not in self.supported_mnos:
             raise ValueError(f"{mno_provider} is not a supported mno")
 
         # validate the currency
@@ -337,6 +390,76 @@ class Azampay(object):
         logging.info(response)
         message = response.get("message")
         logging.info(message)
+        return response
+
+    def generate_payment_link(
+        self,
+        *,
+        amount: str,
+        external_id: str,
+        app_name: str = None,
+        client_id: str = None,
+        provider: str = None,
+        vendor_id: str = None,
+        vendor_name: str = None,
+        request_origin: str = "https://requestorigin.org",
+        redirect_fail_url: str = "https://failure",
+        redirect_success_url: str = "https://success",
+        language: str = "en",
+        cart: Optional[Dict[str, List[Dict[str, str]]]] = None,
+        currency: str = "TZS",
+    ):
+        """generate_payment_link : handle generate_payment_link
+
+        Args:
+            amount (str): This is amount that will be charged from the given account.
+            external_id (str): This id belongs to the calling application
+            app_name (str, optional): This is your Azampay app name. Defaults to None.
+            client_id (str, optional): This a client ID of your application. Defaults to None.
+            vendor_id (str, optional): This is vendor ID of your network provider. Defaults to None.
+            vendor_name (str, optional): This is vendor name of your network provider. Defaults to None.
+            request_origin (_type_, optional): The origin of an app iniating the transaction. Defaults to "https://requestorigin.org".
+            redirect_fail_url (_type_, optional): A link to redirect incase transaction fails. Defaults to "https://failure".
+            redirect_success_url (_type_, optional): A link to redirect incase transaction succeed. Defaults to "https://success".
+            language (str, optional): The language of the payment page. Defaults to "en".
+            cart (Optional[Dict[str, List[Dict[str, str]]]], optional): Items being changed if you have any. Defaults to None.
+            currency (str, optional): The currency of the transaction. Defaults to "TZS".
+
+        Returns:
+            Dict[str, Any]: The JSON response with a payment link
+        """
+
+        if not app_name:
+            app_name = self.app_name
+        if not client_id:
+            client_id = self.client_id
+        if not ((vendor_id and vendor_name) or provider):
+            raise ValueError("Please provide vendor_id and vendor_name or provider")
+        if provider:
+            provider = provider.strip().capitalize()
+            if provider not in self._unmapped_supported_mnos:
+                raise ValueError(f"{provider} is not a supported mno")
+            vendor_id, vendor_name = self._get_vendor_id_and_name(provider)
+
+        # URL : /api/v1/Partner/PostCheckout
+        response = self.post(
+            url=f"{self.BASE_URL}/api/v1/Partner/PostCheckout",
+            body={
+                "amount": amount,
+                "externalId": external_id,
+                "appName": app_name,
+                "clientId": client_id,
+                "vendorId": vendor_id,
+                "vendorName": vendor_name,
+                "requestOrigin": request_origin,
+                "redirectFailURL": redirect_fail_url,
+                "redirectSuccessURL": redirect_success_url,
+                "language": language,
+                "cart": cart or {},
+                "currency": currency,
+            },
+        )
+
         return response
 
 
