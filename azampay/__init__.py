@@ -37,11 +37,11 @@ class Azampay(object):
     BASE_URL: Optional[str] = "https://checkout.azampay.co.tz"
 
     MNOS_MAP: Dict[str, str] = {
-        "Tigopesa": "Tigo",
+        "Tigo": "Tigo",
         "Airtel": "Airtel",
         "Halopesa": "Halopesa",
         "Azampesa": "Azampesa",
-        "Vodacom": "Vodacom",
+        "Mpesa": "Mpesa",
     }
 
     SUPPORTED_BANKS: List[str] = ["CRDB", "NMB"]
